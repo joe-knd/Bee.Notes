@@ -1,0 +1,390 @@
+﻿<Window
+    x:Class="WpfNotes.MainWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:editor="clr-namespace:WpfNotes.Features.Editor"
+    xmlns:home="clr-namespace:WpfNotes.Features.Home"
+    xmlns:host="clr-namespace:WpfNotes.Features.DocumentHost"
+    xmlns:chat="clr-namespace:WpfNotes.Features.Chat"
+    xmlns:local="clr-namespace:WpfNotes"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    x:Name="Root"
+    Title="Notes"
+    Icon="/Bee! Solutions logo 1.png"
+    Width="950"
+    Height="550"
+    WindowStartupLocation="CenterScreen"
+    mc:Ignorable="d">
+
+    <WindowChrome.WindowChrome>
+        <WindowChrome
+            CaptionHeight="40"
+            ResizeBorderThickness="4"
+            UseAeroCaptionButtons="True" />
+    </WindowChrome.WindowChrome>
+
+    <Window.Resources>
+        <DataTemplate DataType="{x:Type home:HomeViewModel}">
+            <home:HomeView />
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type host:DocumentHostViewModel}">
+            <ContentControl Content="{Binding ActiveDocument}">
+                <ContentControl.ContentTemplate>
+                    <DataTemplate>
+                        <editor:EditorView />
+                    </DataTemplate>
+                </ContentControl.ContentTemplate>
+            </ContentControl>
+        </DataTemplate>
+
+        <DataTemplate DataType="{x:Type chat:ChatViewModel}">
+            <chat:ChatView />
+        </DataTemplate>
+
+        <!--  Style for custom caption buttons  -->
+        <Style x:Key="CaptionButtonStyle" TargetType="Button">
+            <Setter Property="Width" Value="46" />
+            <Setter Property="Height" Value="40" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="Foreground" Value="White" />
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#33FFFFFF" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#55FFFFFF" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style
+            x:Key="CloseButtonStyle"
+            BasedOn="{StaticResource CaptionButtonStyle}"
+            TargetType="Button">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border
+                            x:Name="Bd"
+                            Background="{TemplateBinding Background}"
+                            SnapsToDevicePixels="True">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#E81123" />
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="Bd" Property="Background" Value="#B20E1C" />
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="40" />
+            <RowDefinition />
+        </Grid.RowDefinitions>
+
+        <!--  ═══ Title bar ═══  -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition />
+                <ColumnDefinition Width="184" />
+            </Grid.ColumnDefinitions>
+
+            <!--  Full-width title bar background  -->
+            <Border Grid.ColumnSpan="3">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Setter Property="Background" Value="DarkGoldenrod" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsActive, RelativeSource={RelativeSource AncestorType=Window}}" Value="False">
+                                <Setter Property="Background" Value="DimGray" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+            </Border>
+
+            <!--  Toolbar buttons  -->
+            <StackPanel
+                Grid.Column="0"
+                Margin="8,0,0,0"
+                VerticalAlignment="Center"
+                Orientation="Horizontal"
+                WindowChrome.IsHitTestVisibleInChrome="True">
+                <TextBlock Margin="5,0,10,0"
+                    VerticalAlignment="Center"
+                    FontWeight="Bold"
+                    WindowChrome.IsHitTestVisibleInChrome="False">
+                    <Run
+                        FontWeight="Bold"
+                        Text="Bee! " />
+                    <Run
+                        FontStyle="Italic"
+                        Text="Notes" />
+                </TextBlock>
+                <Button
+                    Margin="0,0,4,0"
+                    Padding="8,4"
+                    Click="NewNote_Click"
+                    Content="📄"
+                    FontSize="14" />
+                <Button
+                    Padding="8,4"
+                    Click="OpenFile_Click"
+                    Content="📂"
+                    FontSize="14" />
+                <Rectangle
+                    Width="1"
+                    Height="20"
+                    Margin="8,0,0,0"
+                    Fill="White"
+                    Opacity="0.4" />
+            </StackPanel>
+
+            <!--  Tab strip  -->
+            <DockPanel
+                Grid.Column="1"
+                Margin="8,0,0,-1"
+                VerticalAlignment="Bottom">
+
+                <!--  Home tab (not closable)  -->
+                <Button
+                    Click="HomeTab_Click"
+                    DockPanel.Dock="Left"
+                    WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border
+                                x:Name="Bd"
+                                Margin="1,0,1,0"
+                                Padding="10,6"
+                                Background="Transparent"
+                                CornerRadius="10,10,0,0"
+                                Opacity="0.5"
+                                SnapsToDevicePixels="True">
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    FontSize="16"
+                                    Text="🏠" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <DataTrigger Binding="{Binding CurrentViewModel, Converter={x:Static local:IsTypeConverter.Instance}, ConverterParameter={x:Type home:HomeViewModel}}" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="#AA000000" />
+                                    <Setter TargetName="Bd" Property="Opacity" Value="1" />
+                                    <Setter Property="Foreground" Value="White" />
+                                </DataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True" />
+                                        <Condition Binding="{Binding CurrentViewModel, Converter={x:Static local:IsTypeConverter.Instance}, ConverterParameter={x:Type home:HomeViewModel}}" Value="False" />
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter TargetName="Bd" Property="Opacity" Value="0.8" />
+                                </MultiDataTrigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                <Rectangle
+                    Width="1"
+                    Height="20"
+                    Margin="2,0"
+                    VerticalAlignment="Center"
+                    DockPanel.Dock="Left"
+                    Fill="White"
+                    Opacity="0.4" />
+
+                <!--  Chat tab (not closable)  -->
+                <Button
+                    Click="ChatTab_Click"
+                    DockPanel.Dock="Left"
+                    WindowChrome.IsHitTestVisibleInChrome="True">
+                    <Button.Template>
+                        <ControlTemplate TargetType="Button">
+                            <Border
+                                x:Name="Bd"
+                                Margin="1,0,1,0"
+                                Padding="10,6"
+                                Background="Transparent"
+                                CornerRadius="10,10,0,0"
+                                Opacity="0.5"
+                                SnapsToDevicePixels="True">
+                                <TextBlock
+                                    VerticalAlignment="Center"
+                                    FontSize="16"
+                                    Text="💬" />
+                            </Border>
+                            <ControlTemplate.Triggers>
+                                <DataTrigger Binding="{Binding CurrentViewModel, Converter={x:Static local:IsTypeConverter.Instance}, ConverterParameter={x:Type chat:ChatViewModel}}" Value="True">
+                                    <Setter TargetName="Bd" Property="Background" Value="#AA000000" />
+                                    <Setter TargetName="Bd" Property="Opacity" Value="1" />
+                                    <Setter Property="Foreground" Value="White" />
+                                </DataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding IsMouseOver, RelativeSource={RelativeSource Self}}" Value="True" />
+                                        <Condition Binding="{Binding CurrentViewModel, Converter={x:Static local:IsTypeConverter.Instance}, ConverterParameter={x:Type chat:ChatViewModel}}" Value="False" />
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter TargetName="Bd" Property="Opacity" Value="0.8" />
+                                </MultiDataTrigger>
+                            </ControlTemplate.Triggers>
+                        </ControlTemplate>
+                    </Button.Template>
+                </Button>
+
+                <Rectangle
+                    Width="1"
+                    Height="20"
+                    Margin="2,0"
+                    VerticalAlignment="Center"
+                    DockPanel.Dock="Left"
+                    Fill="White"
+                    Opacity="0.4" />
+
+                <!--  Document tabs  -->
+                <ListBox
+                    Background="Transparent"
+                    BorderThickness="0"
+                    ItemsSource="{Binding DocumentHost.Documents, ElementName=Root}"
+                    SelectedItem="{Binding DocumentHost.ActiveDocument, ElementName=Root, Mode=TwoWay}"
+                    SelectionChanged="TabStrip_SelectionChanged">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Padding" Value="0" />
+                            <Setter Property="Margin" Value="0" />
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="Cursor" Value="Hand" />
+                            <Setter Property="WindowChrome.IsHitTestVisibleInChrome" Value="True" />
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Grid>
+                                            <Border
+                                                x:Name="Bd"
+                                                Margin="1,0,1,0"
+                                                Padding="10,6"
+                                                Background="Transparent"
+                                                CornerRadius="10,10,0,0"
+                                                Opacity="0.5"
+                                                SnapsToDevicePixels="True">
+                                                <ContentPresenter VerticalAlignment="Center" />
+                                            </Border>
+                                        </Grid>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="Bd" Property="Background" Value="#AA000000" />
+                                                <Setter TargetName="Bd" Property="Opacity" Value="1" />
+                                                <Setter Property="Foreground" Value="White" />
+                                            </Trigger>
+                                            <MultiTrigger>
+                                                <MultiTrigger.Conditions>
+                                                    <Condition Property="IsMouseOver" Value="True" />
+                                                    <Condition Property="IsSelected" Value="False" />
+                                                </MultiTrigger.Conditions>
+                                                <Setter TargetName="Bd" Property="Opacity" Value="0.75" />
+                                            </MultiTrigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock
+                                    MaxWidth="140"
+                                    VerticalAlignment="Center"
+                                    FontSize="12"
+                                    Text="{Binding Title}"
+                                    TextTrimming="CharacterEllipsis" />
+                                <Button
+                                    Margin="6,0,0,0"
+                                    Padding="4,2"
+                                    VerticalAlignment="Center"
+                                    Command="{Binding DocumentHost.CloseCommand, ElementName=Root}"
+                                    CommandParameter="{Binding}"
+                                    Content="✕"
+                                    FontSize="9" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </DockPanel>
+            <!--  Custom caption buttons  -->
+            <StackPanel
+                Grid.Column="2"
+                Margin="0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Top"
+                Orientation="Horizontal">
+                <Button
+                    Click="About_Click"
+                    Content="&#xE946;"
+                    FontFamily="Segoe MDL2 Assets"
+                    ToolTip="About Bee! Notes"
+                    Style="{StaticResource CaptionButtonStyle}" />
+                <Button
+                    Click="MinimizeButton_Click"
+                    Content="&#xE921;"
+                    FontFamily="Segoe MDL2 Assets"
+                    Style="{StaticResource CaptionButtonStyle}" />
+                <Button
+                    Click="MaximizeRestoreButton_Click"
+                    FontFamily="Segoe MDL2 Assets"
+                    Style="{StaticResource CaptionButtonStyle}">
+                    <TextBlock FontFamily="Segoe MDL2 Assets" FontSize="16">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Text" Value="&#xE922;" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType=Window}}" Value="Maximized">
+                                        <Setter Property="Text" Value="&#xE923;" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </TextBlock.Style>
+                    </TextBlock>
+                </Button>
+                <Button
+                    Click="CloseButton_Click"
+                    Content="&#xE8BB;"
+                    FontFamily="Segoe MDL2 Assets"
+                    Style="{StaticResource CloseButtonStyle}" />
+            </StackPanel>
+        </Grid>
+
+        <!--  ═══ Content area ═══  -->
+        <ContentControl Grid.Row="1" Content="{Binding CurrentViewModel}" />
+    </Grid>
+</Window>
