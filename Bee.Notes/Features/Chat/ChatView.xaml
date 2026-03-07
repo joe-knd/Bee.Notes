@@ -32,7 +32,7 @@
                         VerticalAlignment="Center"
                         Text="{Binding DisplayName, UpdateSourceTrigger=PropertyChanged}">
                         <TextBox.Style>
-                            <Style TargetType="TextBox">
+                            <Style TargetType="TextBox" BasedOn="{StaticResource {x:Type TextBox}}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsConnected}" Value="True">
                                         <Setter Property="IsEnabled" Value="False" />
@@ -53,7 +53,7 @@
                         VerticalAlignment="Center"
                         PasswordChanged="PasswordInput_PasswordChanged">
                         <PasswordBox.Style>
-                            <Style TargetType="PasswordBox">
+                            <Style TargetType="PasswordBox" BasedOn="{StaticResource {x:Type PasswordBox}}">
                                 <Style.Triggers>
                                     <DataTrigger Binding="{Binding IsConnected}" Value="True">
                                         <Setter Property="IsEnabled" Value="False" />
