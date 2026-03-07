@@ -1,4 +1,4 @@
-# WpfNotes
+# Bee.Notes
 
 A lightweight Bee! notes application built with .NET 10 and the MVVM pattern.
 
