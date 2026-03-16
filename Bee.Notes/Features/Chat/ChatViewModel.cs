@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FireFenyx.Notifications.Services;
 using System.Collections.ObjectModel;
 using System.Windows.Threading;
 using WpfNotes.Core.Models;
@@ -15,6 +16,7 @@ public partial class ChatViewModel : ObservableObject
     private readonly IChatService _chat;
     private readonly ChatPersistenceService _persistence;
     private readonly Dispatcher _dispatcher;
+    private readonly INotificationService _notifications;
 
     public ObservableCollection<ChatMessageGroup> MessageGroups { get; } = [];
 
@@ -29,11 +31,12 @@ public partial class ChatViewModel : ObservableObject
 
     public event Action? ScrollRequested;
 
-    public ChatViewModel(IChatService chat, ChatPersistenceService persistence)
+    public ChatViewModel(IChatService chat, ChatPersistenceService persistence, INotificationService notifications)
     {
         _chat = chat;
         _persistence = persistence;
         _dispatcher = Dispatcher.CurrentDispatcher;
+        _notifications = notifications;
 
         _chat.MessageReceived += OnMessageReceived;
         _chat.StatusChanged += OnChatStatusChanged;
@@ -56,6 +59,8 @@ public partial class ChatViewModel : ObservableObject
             IsConnected = _chat.IsConnected;
             Fingerprint = _chat.CertificateFingerprint ?? string.Empty;
         });
+
+        _notifications.Info($"Chat status changed: {status}");
     }
 
     private void AddMessage(ChatMessage msg)
@@ -96,10 +101,12 @@ public partial class ChatViewModel : ObservableObject
             await _chat.HostAsync(DisplayName, Port, RoomPassword);
             IsConnected = _chat.IsConnected;
             Fingerprint = _chat.CertificateFingerprint ?? string.Empty;
+            _notifications.Success("Hosting started successfully");
         }
         catch (Exception ex)
         {
             Status = $"Host failed: {ex.Message}";
+            _notifications.Error($"Hosting failed: {ex.Message}");
         }
     }
 
@@ -112,10 +119,12 @@ public partial class ChatViewModel : ObservableObject
             await _chat.JoinAsync(DisplayName, HostAddress, Port, RoomPassword);
             IsConnected = _chat.IsConnected;
             Fingerprint = _chat.CertificateFingerprint ?? string.Empty;
+            _notifications.Success("Joined chat successfully");
         }
         catch (Exception ex)
         {
             Status = $"Join failed: {ex.Message}";
+            _notifications.Error($"Join failed: {ex.Message}");
         }
     }
 
@@ -135,6 +144,7 @@ public partial class ChatViewModel : ObservableObject
         await _chat.DisconnectAsync();
         IsConnected = false;
         Status = "Disconnected";
+        _notifications.Info("Disconnected from chat");
     }
 
     partial void OnIsConnectedChanged(bool value)

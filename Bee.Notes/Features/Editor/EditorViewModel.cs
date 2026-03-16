@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FireFenyx.Notifications.Services;
 using System;
 using System.IO;
 using System.Windows.Threading;
@@ -16,6 +17,7 @@ public partial class EditorViewModel : ObservableObject
     private const long MaxFileSizeBytes = 10 * 1024 * 1024; // 10 MB
 
     private readonly INotesService _notesService;
+    private readonly INotificationService _notifications;
 
     private Guid? _id;
 
@@ -34,9 +36,10 @@ public partial class EditorViewModel : ObservableObject
 
     private readonly DispatcherTimer _autosaveTimer = new() { Interval = TimeSpan.FromSeconds(10) };
 
-    public EditorViewModel(INotesService notesService, object? parameter = null)
+    public EditorViewModel(INotesService notesService, INotificationService notifications, object? parameter = null)
     {
         _notesService = notesService;
+        _notifications = notifications;
 
         if (parameter is Guid id)
         {
@@ -61,21 +64,25 @@ public partial class EditorViewModel : ObservableObject
                 FilePath = fullPath;
                 Title = Path.GetFileName(fullPath);
                 Content = await File.ReadAllTextAsync(fullPath);
+                _notifications.Info($"Loaded content from {fullPath}");
             }
             else
             {
                 Title = note.Title;
                 Content = note.Content;
+                _notifications.Warning($"File {fullPath} is too large to load or does not exist. Loaded note content from database instead.");
             }
         }
         else
         {
             Title = note.Title;
             Content = note.Content;
+            _notifications.Info($"Loaded note content from database.");
         }
 
         _initialTitle = Title;
         _initialContent = Content;
+        _notifications.Success($"Note loaded successfully.");
     }
 
     private async Task AutoSaveAsync()
@@ -83,6 +90,7 @@ public partial class EditorViewModel : ObservableObject
         if (!IsDirty) return;
 
         await SaveInternalAsync();
+        _notifications.Info($"Note auto-saved at {DateTime.Now:T}");
     }
 
     private async Task SaveInternalAsync()
@@ -90,6 +98,7 @@ public partial class EditorViewModel : ObservableObject
         if (FilePath is not null)
         {
             await File.WriteAllTextAsync(FilePath, Content);
+            _notifications.Info($"Content saved to {FilePath}");
         }
 
         var note = new Note
@@ -106,9 +115,13 @@ public partial class EditorViewModel : ObservableObject
 
         _initialTitle = Title;
         _initialContent = Content;
+        _notifications.Success($"Note saved successfully.");
     }
 
     [RelayCommand]
-    private async Task SaveAsync() =>
+    private async Task SaveAsync()
+    {
         await SaveInternalAsync();
+        _notifications.Success($"Note saved successfully.");
+    }
 }

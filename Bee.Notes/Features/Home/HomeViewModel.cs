@@ -1,5 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using FireFenyx.Notifications.Services;
 using System;
 using System.Collections.ObjectModel;
 using WpfNotes.Core.Models;
@@ -16,14 +17,16 @@ public partial class HomeViewModel : ObservableObject
     private readonly INotesService _notesService;
     private readonly INavigationService _navigation;
     private readonly DocumentHostViewModel _host;
+    private readonly INotificationService _notifications;
 
     public ObservableCollection<Note> RecentNotes { get; } = new();
 
-    public HomeViewModel(INotesService notesService, INavigationService navigation, DocumentHostViewModel host)
+    public HomeViewModel(INotesService notesService, INavigationService navigation, INotificationService notifications, DocumentHostViewModel host)
     {
         _notesService = notesService;
         _navigation = navigation;
         _host = host;
+        _notifications = notifications;
 
         _ = LoadAsync();
     }
@@ -34,6 +37,7 @@ public partial class HomeViewModel : ObservableObject
         RecentNotes.Clear();
         foreach (var note in notes)
             RecentNotes.Add(note);
+        _notifications.Success($"Loaded {notes.Count()} recent notes.");
     }
 
     [RelayCommand]
@@ -41,6 +45,7 @@ public partial class HomeViewModel : ObservableObject
     {
         _host.Open(null);
         _navigation.Navigate<DocumentHostViewModel>();
+        _notifications.Info("Creating new note...");
     }
 
     [RelayCommand]
@@ -48,6 +53,7 @@ public partial class HomeViewModel : ObservableObject
     {
         _host.Open(note.Id);
         _navigation.Navigate<DocumentHostViewModel>();
+        _notifications.Info($"Opening note {note.Title}...");
     }
 
     [RelayCommand]
@@ -55,5 +61,6 @@ public partial class HomeViewModel : ObservableObject
     {
         await _notesService.DeleteAsync(note.Id);
         RecentNotes.Remove(note);
+        _notifications.Warning($"Deleted note {note.Title}.");
     }
 }

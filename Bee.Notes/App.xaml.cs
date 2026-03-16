@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.ComponentModel;
+using FireFenyx.Wpf.Notifications.Extensions;
 using Microsoft.Extensions.DependencyInjection;
 using System.Configuration;
 using System.Data;
@@ -38,6 +39,8 @@ public partial class App : Application
         services.AddSingleton<IChatService, ChatService>();
         services.AddSingleton<ChatPersistenceService>();
         services.AddSingleton<ChatViewModel>();
+
+        services.AddNotificationServices();
 
 
         // Factory for ViewModels with optional parameter

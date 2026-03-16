@@ -2,18 +2,19 @@
     x:Class="WpfNotes.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:chat="clr-namespace:WpfNotes.Features.Chat"
+    xmlns:controls="clr-namespace:FireFenyx.Wpf.Notifications.Controls;assembly=FireFenyx.Wpf.Notifications"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:editor="clr-namespace:WpfNotes.Features.Editor"
     xmlns:home="clr-namespace:WpfNotes.Features.Home"
     xmlns:host="clr-namespace:WpfNotes.Features.DocumentHost"
-    xmlns:chat="clr-namespace:WpfNotes.Features.Chat"
     xmlns:local="clr-namespace:WpfNotes"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     x:Name="Root"
     Title="Notes"
-    Icon="/Bee! Solutions logo 1.png"
     Width="950"
     Height="550"
+    Icon="/Bee! Solutions logo 1.png"
     WindowStartupLocation="CenterScreen"
     mc:Ignorable="d">
 
@@ -136,16 +137,13 @@
                 VerticalAlignment="Center"
                 Orientation="Horizontal"
                 WindowChrome.IsHitTestVisibleInChrome="True">
-                <TextBlock Margin="5,0,10,0"
+                <TextBlock
+                    Margin="5,0,10,0"
                     VerticalAlignment="Center"
                     FontWeight="Bold"
                     WindowChrome.IsHitTestVisibleInChrome="False">
-                    <Run
-                        FontWeight="Bold"
-                        Text="Bee! " />
-                    <Run
-                        FontStyle="Italic"
-                        Text="Notes" />
+                    <Run FontWeight="Bold" Text="Bee! " />
+                    <Run FontStyle="Italic" Text="Notes" />
                 </TextBlock>
                 <Button
                     Margin="0,0,4,0"
@@ -352,8 +350,8 @@
                     Click="About_Click"
                     Content="&#xE946;"
                     FontFamily="Segoe MDL2 Assets"
-                    ToolTip="About Bee! Notes"
-                    Style="{StaticResource CaptionButtonStyle}" />
+                    Style="{StaticResource CaptionButtonStyle}"
+                    ToolTip="About Bee! Notes" />
                 <Button
                     Click="MinimizeButton_Click"
                     Content="&#xE921;"
@@ -386,5 +384,15 @@
 
         <!--  ═══ Content area ═══  -->
         <ContentControl Grid.Row="1" Content="{Binding CurrentViewModel}" />
+        <controls:NotificationHost
+            Grid.Row="1"
+            BarStyle="AccentStrip"
+            DefaultDurationMs="4000"
+            DefaultMaterial="Acrylic"
+            DefaultTransition="SlideAndFade"
+            HostHorizontalAlignment="Center"
+            HostPadding="0,0,0,8"
+            HostPosition="Bottom"
+            HostSpacing="10" />
     </Grid>
 </Window>
